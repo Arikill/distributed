@@ -1,3 +1,27 @@
+var socket = io();
+
+socket.on('connect', function() {
+    socket.emit('my event', {data: "I\'m connected!"});
+});
+
+document.getElementById("current").addEventListener("change", function () {
+    setup();
+});
+
+function setup() {
+    var formData = new FormData(document.getElementById("send"));
+    console.log(formData);
+    window.fetch(document.location.protocol + "//" + document.location.hostname + ":" + document.location.port + "/setup", {
+        credentials: 'include',
+        method: 'POST', // or 'PUT'
+        body: formData,
+    }).then(response => {
+        response.json().then((c) => {
+            console.log(c);
+        });
+    });
+}
+
 window.onload = function () {
     var elems = document.querySelectorAll("input[type=range]");
     M.Range.init(elems);
