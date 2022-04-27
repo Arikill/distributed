@@ -2,9 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class RCcircuit:
-    def __init__(self, R:float=1, C:float=0.001) -> None:
+    def __init__(self, R:float=1, C:float=0.001, t:float=0.0) -> None:
         self.R = R
         self.C = C
+        self.t = t
         self.built = False
         pass
     
@@ -16,8 +17,11 @@ class RCcircuit:
         self.C = C
         pass
 
-    def __call__(self, V, I, Fs):
-        return V + (1/Fs)*(1/self.C)*(I - (1/self.R)*(V))
+    def __call__(self, V, I, t):
+        print(t-self.t)
+        V = V + (t-self.t)*(1/self.C)*(I - (1/self.R)*(V))
+        self.t = t
+        return V
 
 if __name__ == "__main__":
     Fs = 1e4
