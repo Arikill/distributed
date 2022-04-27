@@ -5,10 +5,10 @@ window.onload = function () {
 
 function getInputs() {
     return new Promise ((resolve, reject) => {
-        json = {}
+        var json = {}
         json.voltage = parseFloat(document.getElementById("plot").data[0].y[document.getElementById("plot").data[0].y.length-1]);
         json.current = parseFloat(document.getElementById("current").value);
-        samplingRate = parseFloat(document.getElementById("samplingRate").value);
+        var samplingRate = parseFloat(document.getElementById("samplingRate").value);
         json.currentTime = parseFloat(document.getElementById("plot").data[0].x[document.getElementById("plot").data[0].x.length-1]);
         if (samplingRate <= 0) {
             samplingRate = parseFloat(100);
@@ -17,7 +17,6 @@ function getInputs() {
         if (json.currentTime < 0) {
             json.currentTime = 0;
         }
-        console.log(json);
         json.currentTime = json.currentTime + (1.0/samplingRate);
         resolve(json);
     });
@@ -41,17 +40,25 @@ socket.on('setup', function(res) {
     console.log(res);
 });
 
-document.getElementById("current").addEventListener("change", function () {
-    getInputs().then((json) => {
-        socket.emit('call', json);
-    });
+document.getElementById("run").addEventListener("click", function () {
+    if (document.getElementById("run").getAttribute("state") === '0') {
+        getInputs().then((json) => {
+            socket.emit('call', json);
+            document.getElementById("run").setAttribute("state", '1');
+        });
+    } else {
+        document.getElementById("run").setAttribute("state", '0');
+    }
 });
 
 socket.on('call', function(res) {
-    update_plot(res).then(() => {
-        var event = new Event('change');
-        document.getElementById("current").dispatchEvent(event);    
-    });
+    if (document.getElementById("run").getAttribute("state") === '1') {
+        update_plot(res).then(() => {
+            return getInputs();
+        }).then((json) => {
+            socket.emit('call', json);
+        });
+    }
 });
 
 function update_plot(res) {
@@ -62,8 +69,7 @@ function update_plot(res) {
         document.getElementById("plot").data[0].x.push(res["time"]);
         document.getElementById("plot").data[1].y.shift();
         document.getElementById("plot").data[1].y.push(parseFloat(res['current']));
-        document.getElementById("plot").data[1].x.shift();
-        document.getElementById("plot").data[1].x.push(res["time"]);
+        document.getElementById("plot").data[1].x = document.getElementById("plot").data[0].x;
         Plotly.update('plot', document.getElementById("plot").data, document.getElementById("plot").layout);
         resolve();
     });

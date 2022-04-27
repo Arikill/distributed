@@ -18,7 +18,6 @@ class RCcircuit:
         pass
 
     def __call__(self, V, I, t):
-        print(t-self.t)
         V = V + (t-self.t)*(1/self.C)*(I - (1/self.R)*(V))
         self.t = t
         return V
