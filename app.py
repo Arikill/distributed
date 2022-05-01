@@ -18,24 +18,29 @@ socketio = SocketIO(app)
 
 rc = RCcircuit()
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def index():
-    if request.method == "POST":
-        R = float(request.form["resistance"])
-        C = float(request.form["capacitance"])
-        return jsonify({"status": "OK"})
     return render_template("index.html")
 
-@socketio.on('setup')
+@app.route("/rc")
+def RC():
+    return render_template("rc.html")
+
+@socketio.on('setup/rc')
 def setup(json):
     rc.set_R(float(json["resistance"]))
     rc.set_C(float(json["capacitance"]))
     rc.t = float(json["time"])
-    socketio.emit('setup', {"status": "OK"})
+    socketio.emit('setup/rc', {"status": "OK"})
 
-@socketio.on('call')
+@socketio.on('call/rc')
 def call(json):
-    socketio.emit('call', {'voltage': rc(float(json["voltage"]), float(json["current"]), float(json["currentTime"])), 'current': float(json["current"]), 'time': float(json["currentTime"])})
+    socketio.emit('call/rc', {'voltage': rc(float(json["voltage"]), float(json["current"]), float(json["currentTime"])), 'current': float(json["current"]), 'time': float(json["currentTime"])})
+
+@app.route("/mimic")
+def MIMIC():
+    return render_template("mimic.html")
+
 
 if __name__ == "__main__":
     # app.run(host=_host, port=_port, debug=True)

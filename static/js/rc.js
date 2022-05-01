@@ -43,7 +43,7 @@ socket.on('setup/rc', function(res) {
 document.getElementById("run").addEventListener("click", function () {
     if (document.getElementById("run").getAttribute("state") === '0') {
         getInputs().then((json) => {
-            socket.emit('call', json);
+            socket.emit('call/rc', json);
             document.getElementById("run").setAttribute("state", '1');
         });
     } else {
@@ -70,7 +70,7 @@ function update_plot(res) {
         document.getElementById("plot").data[1].y.shift();
         document.getElementById("plot").data[1].y.push(parseFloat(res['current']));
         document.getElementById("plot").data[1].x = document.getElementById("plot").data[0].x;
-        Plotly.update('plot', document.getElementById("plot").data, document.getElementById("plot").layout);
+        Plotly.update('plot', document.getElementById("plot").data, document.getElementById("plot").layout, document.getElementById("plot").config);
         resolve();
     });
 }
@@ -106,6 +106,9 @@ function initialize_plot() {
         type: 'line'
     }];
     var layout = {
+        margin: {
+            l: 50, r: 0, t: 50, b: 50
+        },
         title: 'Voltage of RC circuit',
         yaxis: {
             title: 'Volts',
@@ -125,7 +128,7 @@ function initialize_plot() {
         },
         grid: {rows: 2, columns: 1, pattern: 'independent'},
     };
-    Plotly.newPlot('plot', data, layout);
+    Plotly.newPlot('plot', data, layout, {responsive: true});
 } initialize_plot();
 
 // document.getElementById("current").addEventListener("change", function () {
