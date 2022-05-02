@@ -6,15 +6,23 @@ import random
 import string
 import numpy as np
 from Plants import RCcircuit
+import hashlib
+import os
+from werkzeug.utils import secure_filename
 
 csrf = CSRFProtect()
 
 app = Flask(__name__, static_folder="./static", template_folder="./templates")
+app.config["UPLOAD_FOLDER"] = "./uploads"
 _host = "localhost"
 _port = 8000
+_allowed_extensions=["txt", "csv"]
 app.secret_key = "".join(random.choices(string.digits + string.ascii_uppercase + string.ascii_lowercase, k=100))
 csrf.init_app(app)
 socketio = SocketIO(app)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in _allowed_extensions
 
 rc = RCcircuit()
 
@@ -37,11 +45,21 @@ def setup(json):
 def call(json):
     socketio.emit('call/rc', {'voltage': rc(float(json["voltage"]), float(json["current"]), float(json["currentTime"])), 'current': float(json["current"]), 'time': float(json["currentTime"])})
 
-@app.route("/mimic")
+@app.route("/mimic", methods=["GET", "POST"])
 def MIMIC():
+    if request.method == "POST":
+        if 'data-file' not in request.files:
+            return jsonify({"status": False, "msg": "No file found!"})
+        file = request.files["data-file"]
+        if file.filename == "":
+            return jsonify({"status": False, "msg": "File has no name"})
+        if allowed_file(file.filename):
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+            return jsonify({"status": True, "msg": "File saved"})
+        return jsonify({"status": False, "msg": "file type not allowed"})
     return render_template("mimic.html")
 
-
 if __name__ == "__main__":
-    # app.run(host=_host, port=_port, debug=True)
+    for f in os.listdir(app.config["UPLOAD_FOLDER"]):
+        os.remove(os.path.join(app.config["UPLOAD_FOLDER"], f))
     socketio.run(app, host=_host, port=_port, debug=True)
