@@ -31,10 +31,26 @@
                             <input id="structure" name="structure" type="text" class="validate" value="4, 2">
                             <label for="structure">Structure</label>
                         </div>
+                        <div class="col s12 m12 l12">
+                            <a class="right waves-effect waves-light btn" id="setup"><i class="material-icons"
+                                    id="setup-icon">autorenew</i></a>
+                        </div>
+                    </div>
+                </form>
+                <form id="variables-form" method="POST">
+                    <!-- <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}" /> -->
+                    <div class="row">
                         <div class="input-field col s12 m12 l12">
-                            <input id="nOutputs" name="nOutputs" type="number" class="validate" min=1 max=1e2
-                                step=1 value=1>
-                            <label for="nOutputs">Number Of Outputs</label>
+                            <select multiple id="inputs" name="inputs">
+                                <option value="" disabled selected>Choose your option</option>
+                            </select>
+                            <label>Select Inputs</label>
+                        </div>
+                        <div class="input-field col s12 m12 l12">
+                            <select multiple id="outputs" name="outputs">
+                                <option value="" disabled selected>Choose your option</option>
+                            </select>
+                            <label>Select Outputs</label>
                         </div>
                         <div class="col s12 m12 l12">
                             <a class="right waves-effect waves-light btn" id="run" state=0><i class="material-icons"

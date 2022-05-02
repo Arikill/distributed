@@ -6,9 +6,9 @@ import random
 import string
 import numpy as np
 from Plants import RCcircuit
-import hashlib
 import os
 from werkzeug.utils import secure_filename
+import Reader
 
 csrf = CSRFProtect()
 
@@ -55,7 +55,8 @@ def MIMIC():
             return jsonify({"status": False, "msg": "File has no name"})
         if allowed_file(file.filename):
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
-            return jsonify({"status": True, "msg": "File saved"})
+            vars = Reader.read_txt(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+            return jsonify({"status": True, "variables": vars})
         return jsonify({"status": False, "msg": "file type not allowed"})
     return render_template("mimic.html")
 

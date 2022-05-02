@@ -1,18 +1,50 @@
 window.onload = function () {
-    var elems = document.querySelectorAll("input[type=range]");
-    M.Range.init(elems);
+    M.Range.init(document.querySelectorAll("input[type=range]"));
+    M.FormSelect.init(document.querySelectorAll("select"));
 };
 
-function send_data() {
+var socketio = io();
+
+document.getElementById("data-file").addEventListener("change", function() {
     var formData = new FormData(document.getElementById("data-form"));
     window.fetch(document.URL, {
         method: "POST",
         body: formData
-    }).then(res => console.log(res));
-};
+    }).then(res => res.json()).then((res) => {
+        var html = '';
+        for(var i = 0; i < res.variables.length; i++) {
+            html += `<option value="${res.variables[i]}">${res.variables[i]}</option>`;
+        }
+        document.getElementById("inputs").innerHTML=html;
+        document.getElementById("outputs").innerHTML=html;
+        M.FormSelect.init(document.querySelectorAll("#inputs, #outputs"));
+    });
+});
 
-document.getElementById("data-file").addEventListener("change", function() {
-    send_data();
+function getInputs() {
+    var selected = [];
+    for (var option of document.getElementById('inputs').options)
+    {
+        if (option.selected) {
+            selected.push(option.value);
+        }
+    }
+    return selected;
+}
+
+function getOutputs() {
+    var selected = [];
+    for (var option of document.getElementById('outputs').options)
+    {
+        if (option.selected) {
+            selected.push(option.value);
+        }
+    }
+    return selected;
+}
+
+socket.on('setup/mimic', function() {
+    socket.emit("");
 });
 
 // function getInputs() {
