@@ -32,6 +32,17 @@ function getInputs() {
     return selected;
 }
 
+document.getElementById('inputs').addEventListener('change', function() {
+    var inputs = getInputs();
+    var outputs = getOutputs();
+    for (var input of inputs) {
+        if (outputs.includes(input)) {
+            document.getElementById('outputs').querySelector(`option[value="${input}"]`).selected=false;
+            M.FormSelect.init(document.getElementById('outputs'));
+        }
+    }
+});
+
 function getOutputs() {
     var selected = [];
     for (var option of document.getElementById('outputs').options)
@@ -43,9 +54,44 @@ function getOutputs() {
     return selected;
 }
 
-socket.on('setup/mimic', function() {
-    socket.emit("");
+document.getElementById('outputs').addEventListener('change', function() {
+    var inputs = getInputs();
+    var outputs = getOutputs();
+    for (var output of outputs) {
+        if (inputs.includes(output)) {
+            document.getElementById('inputs').querySelector(`option[value="${output}"]`).selected=false;
+            M.FormSelect.init(document.getElementById('inputs'));
+        }
+    }
 });
+
+socketio.on('setup/mimic', function() {
+    socketio.emit("");
+});
+
+function initialize_line_plot(div, x_label, y_label, color, title) {
+    var xData = new Array(100);
+    var yData = new Array(100);
+    var data = [{
+        x: xData,
+        y: yData,
+        type: 'line',
+        marker: {color: color}
+    }];
+    var layout = {
+        margin: {l: 50, r: 0, t: 50, b: 50},
+        title: title,
+        yaxis: {
+            title: y_label,
+            autorange: true
+        },
+        xaxis: {
+            title: x_label,
+            autorange: true
+        }
+    }
+    Plotly.newPlot(div, data, layout, {responsive: true});
+}
 
 // function getInputs() {
 //     return new Promise ((resolve, reject) => {
